@@ -21,9 +21,17 @@
         '<span class="tw-title">Tab Whisper — live English</span>' +
         '<button type="button" class="tw-btn" id="tw-bottom" title="Jump to latest line">↓ Bottom</button>' +
         '<button type="button" class="tw-btn" id="tw-toggle" title="Hide/show transcript">Hide</button>' +
+        '<button type="button" class="tw-btn" id="tw-gear" title="Sensitivity — ignore chunks quieter than (dB)">⚙</button>' +
         '<button type="button" class="tw-btn" id="tw-close" title="Remove overlay (capture keeps running)">×</button>' +
       '</div>' +
-      '<div class="tw-lines" id="tw-lines"><div class="tw-line tw-empty">Listening… English transcript will appear here.</div></div>';
+      '<div class="tw-lines" id="tw-lines"><div class="tw-line tw-empty">Listening… English transcript will appear here.</div></div>' +
+      '<div class="tw-settings" id="tw-settings" style="display:none">' +
+        '<label>Sensitivity — ignore chunks quieter than <span id="tw-dbval">-40</span> dB ' +
+        '<input type="range" id="tw-dbslider" min="-60" max="-10" step="1" value="-40"></label> ' +
+        '<span class="tw-note">Saved — applies on next Start.</span><br>' +
+        '<label>Chunk (seconds) <input type="number" id="tw-chunk" min="3" max="60" step="1" value="10" style="width:52px"></label> ' +
+        '<span class="tw-note">3–60s, 10s default. Shorter = faster lines, less accurate.</span>' +
+      '</div>';
     document.body.appendChild(el);
     // Firefox parity: per-button bubble-phase listeners were swallowed
     // on cam pages — the page's own click handlers stopPropagation()
@@ -38,6 +46,20 @@
       if (btn.id === 'tw-bottom') {
         const box = el.querySelector('#tw-lines');
         if (box) box.scrollTop = box.scrollHeight;
+      } else if (btn.id === 'tw-gear') {
+        const panel = el.querySelector('#tw-settings');
+        const slider = el.querySelector('#tw-dbslider');
+        const val = el.querySelector('#tw-dbval');
+        const show = panel.style.display === 'none';
+        panel.style.display = show ? '' : 'none';
+        if (show) {
+          chrome.storage.local.get('settings', (stored) => {
+            const cur = (stored.settings && typeof stored.settings.minDb === 'number') ? stored.settings.minDb : -40;
+            slider.value = cur; val.textContent = cur;
+            const chunk = el.querySelector('#tw-chunk');
+            if (chunk) chunk.value = (stored.settings && typeof stored.settings.chunkSeconds === 'number') ? stored.settings.chunkSeconds : 10;
+          });
+        }
       } else if (btn.id === 'tw-toggle') {
         visible = !visible;
         el.querySelector('#tw-lines').style.display = visible ? '' : 'none';
@@ -81,6 +103,31 @@
       document.addEventListener('mousemove', move);
       document.addEventListener('mouseup', up);
     });
+    // Chunk length (v1.0.15): save on change, clamped 3–60s.
+    const chunkInput = el.querySelector('#tw-chunk');
+    if (chunkInput) {
+      chunkInput.addEventListener('change', () => {
+        const v = Math.max(3, Math.min(60, Number(chunkInput.value) || 10));
+        chunkInput.value = v;
+        chrome.storage.local.get('settings', (stored) => {
+          const s = { ...(stored.settings || {}), chunkSeconds: v };
+          chrome.storage.local.set({ settings: s });
+        });
+      });
+    }
+    // Sensitivity slider (v1.0.15): live label on input, save on change.
+    const slider = el.querySelector('#tw-dbslider');
+    const dbval = el.querySelector('#tw-dbval');
+    if (slider) {
+      slider.addEventListener('input', () => { dbval.textContent = slider.value; });
+      slider.addEventListener('change', () => {
+        const v = Math.max(-60, Math.min(-10, Number(slider.value) || -40));
+        chrome.storage.local.get('settings', (stored) => {
+          const s = { ...(stored.settings || {}), minDb: v };
+          chrome.storage.local.set({ settings: s });
+        });
+      });
+    }
     return el;
   }
 

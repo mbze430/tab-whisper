@@ -100,6 +100,10 @@ the model field entirely; some require an exact local model name).
 3. **Then the real room.** Same steps. Keep the captured tab active:
    tabCapture only works on the active tab in its window.
 
+## v1.0.15 — Overlay ⚙ settings (Nov 25, 2026)
+
+- New: a ⚙ button in the overlay header opens a settings panel right on the page — sensitivity (dB gate) slider, -60 to -10, and chunk length, 3–60s. No more going back to the extension popup. Both save to the same settings the popup uses, and both apply on the next Start (stop first if capturing).
+
 ## v1.0.14 — Overlay only on the capturing tab (Nov 25, 2026)
 
 - Bug fix: the overlay was built on EVERY tab on page load, because the content script (injected into `<all_urls>`) built it unconditionally. Now it builds on demand only — when capture starts on that tab, or the first transcript/status line arrives for it. Other tabs get no overlay at all.

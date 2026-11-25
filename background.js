@@ -10,7 +10,7 @@ const OFFSCREEN_REASON = 'USER_MEDIA';
 const MAX_HISTORY = 200;
 
 const DEFAULT_SETTINGS = {
-  whisperUrl: 'http://localhost:8080/v1/audio/transcriptions',
+  whisperUrl: 'http://10.0.253.30:10300/v1/audio/transcriptions',
   apiKey: '',
   model: 'whisper-1',
   language: 'ru',
@@ -171,6 +171,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return sendResponse({ ok: false, error: 'Unknown message: ' + msg.type });
   })();
   return true; // async sendResponse
+});
+
+// Keyboard shortcut (v1.0.11): Ctrl+Shift+Y (Cmd+Shift+Y on Mac) toggles
+// capture on the active tab. Change it at chrome://extensions/shortcuts.
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command !== 'toggle-capture') return;
+  if (capturing) { await stopCapture(); return; }
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab || tab.id === undefined) return;
+  await startCapture(tab.id);
 });
 
 // If the captured tab is closed / navigated away, stop cleanly.

@@ -25,6 +25,9 @@
   "host_permissions": [
     "http://localhost/*",
     "http://127.0.0.1/*",
+    "http://ai-i.server.adhome.home/*",
+    "http://*.adhome.home/*",
+    "http://10.0.253.30/*",
     "https://*/*"
   ],
   "icons": {
@@ -41,7 +44,7 @@
     "scripting",
     "offscreen"
   ],
-  "version": "1.0.10",
+  "version": "1.0.12",
   "web_accessible_resources": [
     {
       "matches": [
@@ -51,5 +54,14 @@
         "offscreen.html"
       ]
     }
-  ]
+  ],
+  "commands": {
+    "toggle-capture": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Start/stop Tab Whisper capture on this tab"
+    }
+  }
 }

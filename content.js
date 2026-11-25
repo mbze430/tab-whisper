@@ -95,7 +95,8 @@
     box.innerHTML = recent.map((l) => {
       const time = new Date(l.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const safe = String(l.text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      return '<div class="tw-line"><span class="tw-time">' + time + '</span> ' + safe + '</div>';
+      const langTag = l.languageName ? '<span class="tw-lang">[' + String(l.languageName).replace(/&/g, '&amp;').replace(/</g, '&lt;') + ']</span> ' : '';
+      return '<div class="tw-line"><span class="tw-time">' + time + '</span> ' + langTag + safe + '</div>';
     }).join('') || '<div class="tw-line tw-empty">Listening…</div>';
     if (atBottom) box.scrollTop = box.scrollHeight;
   }

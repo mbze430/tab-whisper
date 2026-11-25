@@ -19,6 +19,22 @@ let settings = null;
 let stopped = false;
 let chunkIndex = 0;
 let inFlight = 0;
+let lastDetectedLanguage = '';
+// Detected-language names (v1.0.12 / v1.0.11): Whisper returns a 2-letter
+// code in verbose_json; map the common ones to a readable name.
+const LANGUAGE_NAMES = {
+  en: 'English', ru: 'Russian', es: 'Spanish', fr: 'French', de: 'German',
+  it: 'Italian', pt: 'Portuguese', uk: 'Ukrainian', pl: 'Polish', ro: 'Romanian',
+  nl: 'Dutch', sv: 'Swedish', da: 'Danish', fi: 'Finnish', no: 'Norwegian',
+  cs: 'Czech', sk: 'Slovak', hu: 'Hungarian', bg: 'Bulgarian', hr: 'Croatian',
+  sr: 'Serbian', el: 'Greek', tr: 'Turkish', ar: 'Arabic', he: 'Hebrew',
+  fa: 'Persian', hi: 'Hindi', ja: 'Japanese', ko: 'Korean', zh: 'Chinese',
+  th: 'Thai', vi: 'Vietnamese', id: 'Indonesian', ms: 'Malay'
+};
+function languageName(code) {
+  if (!code) return '';
+  return LANGUAGE_NAMES[code.toLowerCase()] || code.toUpperCase();
+}
 
 // Hallucination blocklist (Firefox parity, Nov 25): phrases Whisper
 // invents on music/silence. Exact-match only (case-insensitive,
@@ -104,14 +120,17 @@ async function postChunk(blob, index) {
   // Whisper servers key off the filename extension for format sniffing.
   form.append('file', blob, 'chunk-' + index + '.webm');
   form.append('model', settings.model || 'whisper-1');
-  form.append('response_format', 'json');
+  // verbose_json (v1.0.12): 'json' returns text only — verbose_json also
+  // returns the auto-detected source language, duration, and segments.
+  // fedirz faster-whisper-server supports it; it's standard OpenAI.
+  form.append('response_format', 'verbose_json');
   if (settings.task === 'transcribe' && settings.language) {
     form.append('language', settings.language);
   }
   // temperature left at server default; low temp = less hallucination on short chunks.
   form.append('temperature', '0');
   // VAD REMOVED (v1.0.9): vad_filter=true killed all real translation
-  // in testing — Russian speech over background music was
+  // in Lady--M's room — her Russian speech over background music was
   // classified as non-speech and dropped. Back to no VAD; hallucinated
   // music lines are the lesser evil vs. losing her actual speech.
 
@@ -127,7 +146,8 @@ async function postChunk(blob, index) {
       // fedirz faster-whisper-server may not implement /v1/audio/translations:
       // fall back to /v1/audio/transcriptions once and keep capturing.
       // 500 too (Firefox parity): the server crashes on a silent/music
-      // chunk — usually language detection, or the model OOMing on the GPU. Transcriptions usually succeeds where
+      // chunk — usually language detection, or the model OOMing against
+      // Glimmer on GPU 0. Transcriptions usually succeeds where
       // translations 500s; you get Russian text instead of nothing.
       if ((res.status === 404 || res.status === 405 || res.status === 500) && settings.task === 'translate' && !translateFallbackTried) {
         translateFallbackTried = true;
@@ -144,6 +164,11 @@ async function postChunk(blob, index) {
     }
     const data = await res.json().catch(() => ({}));
     const text = (data.text || '').trim();
+    const lang = (data.language || '').toLowerCase();
+    if (lang && lang !== lastDetectedLanguage) {
+      lastDetectedLanguage = lang;
+      status('Detected language: ' + languageName(lang) + ' (' + lang + ') — Whisper guesses from the first seconds of a chunk, so a short/noisy chunk can mis-detect.');
+    }
     if (text && isHallucination(text)) {
       console.log('[TabWhisper] dropped hallucination:', text);
       return;
@@ -152,7 +177,9 @@ async function postChunk(blob, index) {
       const line = {
         at: new Date().toISOString(),
         chunk: index,
-        text
+        text,
+        language: lang || undefined,
+        languageName: lang ? languageName(lang) : undefined
       };
       chrome.runtime.sendMessage({ type: 'offscreen-transcript', line }).catch(() => {});
     }

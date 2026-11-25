@@ -1,10 +1,10 @@
 // Tab Whisper — popup: Start/Stop, settings, transcript history.
 // Settings are stored in chrome.storage.local and read by the
 // background / offscreen document. No defaults point at any real
-// No defaults point at any real server — the default is localhost, fill in your own.
+// server of Johnny's — the default is localhost, he fills in his own.
 
 const DEFAULT_SETTINGS = {
-  whisperUrl: 'http://localhost:8080/v1/audio/transcriptions',
+  whisperUrl: 'http://10.0.253.30:10300/v1/audio/transcriptions',
   apiKey: '',
   model: 'whisper-1',
   language: 'ru',
@@ -59,7 +59,8 @@ function renderHistory(history) {
   box.innerHTML = history.slice(-100).map((l) => {
     const time = new Date(l.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const safe = String(l.text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return '<div class="line"><span class="time">' + time + '</span>' + safe + '</div>';
+    const langTag = l.languageName ? '[' + String(l.languageName).replace(/&/g, '&amp;').replace(/</g, '&lt;') + '] ' : '';
+    return '<div class="line"><span class="time">' + time + '</span>' + langTag + safe + '</div>';
   }).join('');
   box.scrollTop = box.scrollHeight;
 }
@@ -103,6 +104,15 @@ $('stopBtn').addEventListener('click', async () => {
 });
 
 $('saveBtn').addEventListener('click', () => saveSettings(false));
+
+// User-choosable shortcut: Chrome extensions can't rebind a command
+// from inside the extension — the browser owns the binding. This button
+// just opens the browser's shortcut settings, where any combination
+// can be picked (or the shortcut removed entirely).
+const changeBtn = $('changeShortcutBtn');
+if (changeBtn) changeBtn.addEventListener('click', () => {
+  chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+});
 
 $('clearBtn').addEventListener('click', async () => {
   await chrome.storage.local.set({ transcript: [] });

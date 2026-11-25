@@ -12,7 +12,7 @@ whisper.cpp / faster-whisper) that you already run.
 
 ## What it does
 
-1. Click **Start capturing this tab** in the popup. The extension calls
+1. Click **Start capturing this tab** in the popup, or press **Ctrl+Shift+Y** (Mac: Cmd+Shift+Y) — the shortcut toggles capture on the active tab. The extension calls
    `chrome.tabCapture.capture()` on the active tab.
 2. An offscreen document records the tab audio with `MediaRecorder`
    (WebM/Opus, default 10-second chunks — configurable 3–60 s).
@@ -99,6 +99,14 @@ the model field entirely; some require an exact local model name).
    (skipped automatically if < 1 KB) and imperfect sentences.
 3. **Then the real room.** Same steps. Keep the captured tab active:
    tabCapture only works on the active tab in its window.
+
+## v1.0.12 — Auto-detect language (Nov 25, 2026)
+
+- Whisper requests now use `response_format=verbose_json` (was `json`), which returns the auto-detected source language. Every overlay/popup line is tagged, e.g. **[Russian] Hello**, and the overlay shows `» Detected language: Russian (ru)` when it changes. Caveat: Whisper guesses from the first seconds of a chunk, so a short/noisy chunk can mis-detect — treat it as "possibly", not certain.
+
+## v1.0.11 — Keyboard shortcut (Nov 25, 2026)
+
+- **Ctrl+Shift+Y** (Mac: Cmd+Shift+Y) starts/stops capture on the active tab, no popup needed. Change it at `chrome://extensions/shortcuts`, or click **Change shortcut…** in the popup — pick any combination you want, or remove it entirely.
 
 ## v1.0.10 — Firefox parity (Nov 25, 2026)
 

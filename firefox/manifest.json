@@ -30,7 +30,7 @@
       "run_at": "document_idle"
     }
   ],
-  "description": "Captures a playing <video>/<audio> element in the active tab via captureStream() and sends chunks to your own local Whisper server. No cloud, no minute limit. Firefox has no tabCapture API, so this is NOT a 1:1 port of the Chrome version \u2014 it only works on pages with a real HTML5 media element (YouTube, etc.), not arbitrary tab audio.",
+  "description": "Captures a playing <video>/<audio> element in the active tab via captureStream() and sends chunks to your own local Whisper server. No cloud, no minute limit. Firefox has no tabCapture API, so this is NOT a 1:1 port of the Chrome version \u2014 it only works on pages with a real HTML5 media element (xHamsterLive, YouTube, etc.), not arbitrary tab audio.",
   "icons": {
     "128": "icon128.png",
     "16": "icon16.png",
@@ -45,7 +45,19 @@
     "<all_urls>",
     "http://localhost/*",
     "http://127.0.0.1/*",
+    "http://ai-i.server.adhome.home/*",
+    "http://*.adhome.home/*",
+    "http://10.0.253.30/*",
     "https://*/*"
   ],
-  "version": "1.0.9"
+  "version": "1.0.11",
+  "commands": {
+    "toggle-capture": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Start/stop Tab Whisper capture on this tab"
+    }
+  }
 }

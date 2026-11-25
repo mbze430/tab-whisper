@@ -28,7 +28,7 @@ function sendMsg(msg) {
 //   Firefox cannot capture arbitrary tab audio — browser.tabCapture
 //   does not exist. The only supported route is captureStream() on a
 //   real HTMLMediaElement (<video> / <audio>) in the page.
-//   - Works: YouTube and any site that plays through
+//   - Works: xHamsterLive, YouTube, and any site that plays through
 //     a <video>/<audio> element.
 //   - Does NOT work: WebAudio-only pages, DRM/EME playback (Firefox
 //     yields a silent stream), system audio, or pages with no media
@@ -38,7 +38,7 @@ function sendMsg(msg) {
 //
 // Chunking / Whisper POST is identical to Chrome v1.0.9: 10s cycles
 // (one standalone WebM per cycle), temperature 0, NO VAD (v1.0.9:
-// vad_filter killed real Russian speech over music in testing).
+// vad_filter killed real Russian speech over music in Lady--M's room).
 // Translate falls back to transcriptions once on 404/405.
 
 (function () {
@@ -49,7 +49,7 @@ function sendMsg(msg) {
   // FIX: only the TOP frame builds an overlay. With all_frames:true the
   // video iframe got its own copy, fixed-positioned inside a narrow
   // frame — clipped off the right edge, stuck there (the red-arrow strip
-  // in testing). Capture still runs in the iframe; its
+  // in Johnny's screenshot). Capture still runs in the iframe; its
   // transcript lines are relayed via the background to this top overlay.
   const IS_TOP = (window.self === window.top);
   const OVERLAY_ID = 'tab-whisper-overlay';
@@ -137,7 +137,8 @@ function sendMsg(msg) {
     box.innerHTML = recent.map((l) => {
       const time = new Date(l.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const safe = String(l.text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      return '<div class="tw-line"><span class="tw-time">' + time + '</span> ' + safe + '</div>';
+      const langTag = l.languageName ? '<span class="tw-lang">[' + String(l.languageName).replace(/&/g, '&amp;').replace(/</g, '&lt;') + ']</span> ' : '';
+      return '<div class="tw-line"><span class="tw-time">' + time + '</span> ' + langTag + safe + '</div>';
     }).join('') || '<div class="tw-line tw-empty">Listening…</div>';
     if (atBottom) box.scrollTop = box.scrollHeight;
   }
@@ -174,6 +175,21 @@ function sendMsg(msg) {
     const n = text.toLowerCase().replace(/[…\.\!\?]+$/g, '').trim();
     return HALLUCINATIONS.includes(n);
   }
+// Detected-language names (v1.0.12 / v1.0.11): Whisper returns a 2-letter
+// code in verbose_json; map the common ones to a readable name.
+const LANGUAGE_NAMES = {
+  en: 'English', ru: 'Russian', es: 'Spanish', fr: 'French', de: 'German',
+  it: 'Italian', pt: 'Portuguese', uk: 'Ukrainian', pl: 'Polish', ro: 'Romanian',
+  nl: 'Dutch', sv: 'Swedish', da: 'Danish', fi: 'Finnish', no: 'Norwegian',
+  cs: 'Czech', sk: 'Slovak', hu: 'Hungarian', bg: 'Bulgarian', hr: 'Croatian',
+  sr: 'Serbian', el: 'Greek', tr: 'Turkish', ar: 'Arabic', he: 'Hebrew',
+  fa: 'Persian', hi: 'Hindi', ja: 'Japanese', ko: 'Korean', zh: 'Chinese',
+  th: 'Thai', vi: 'Vietnamese', id: 'Indonesian', ms: 'Malay'
+};
+function languageName(code) {
+  if (!code) return '';
+  return LANGUAGE_NAMES[code.toLowerCase()] || code.toUpperCase();
+}
   // dB gate state: peak dBFS in the current chunk, sampled from an
   // AnalyserNode tapped off the audio stream.
   let audioCtxGate = null;
@@ -254,7 +270,10 @@ function sendMsg(msg) {
     const form = new FormData();
     form.append('file', blob, 'chunk-' + index + '.webm');
     form.append('model', settings.model || 'whisper-1');
-    form.append('response_format', 'json');
+    // verbose_json (v1.0.11): 'json' returns text only — verbose_json also
+    // returns the auto-detected source language. Standard OpenAI, supported
+    // by fedirz faster-whisper-server.
+    form.append('response_format', 'verbose_json');
     if (settings.task === 'transcribe' && settings.language) form.append('language', settings.language);
     form.append('temperature', '0');
     // NO VAD (v1.0.9) — see header.
@@ -268,7 +287,7 @@ function sendMsg(msg) {
         // Fall back to transcriptions on 404/405 (endpoint not implemented)
         // AND on 500 (server crashed on this chunk — usually language
         // detection on a silent/music-only chunk, or the model OOMing
-        // against another model on the same GPU). Transcriptions is the same model,
+        // against Glimmer on GPU 0). Transcriptions is the same model,
         // just without the translate step, so it usually succeeds where
         // translations 500s. You get Russian text instead of nothing.
         if ((res.status === 404 || res.status === 405 || res.status === 500) && settings.task === 'translate' && !translateFallbackTried) {
@@ -283,12 +302,13 @@ function sendMsg(msg) {
       }
       const data = await res.json().catch(() => ({}));
       const text = (data.text || '').trim();
+      const lang = (data.language || '').toLowerCase();
       if (text && isHallucination(text)) {
         console.log('[TabWhisper FF] dropped hallucination:', text);
         return;
       }
       if (text && text.toLowerCase() !== '[silence]') {
-        const line = { at: new Date().toISOString(), chunk: index, text };
+        const line = { at: new Date().toISOString(), chunk: index, text, language: lang || undefined, languageName: lang ? languageName(lang) : undefined };
         // Do NOT showLine() here: the background relays this line back
         // to the top frame, which renders it. Rendering here too =
         // every line doubled in the overlay (popup history was single

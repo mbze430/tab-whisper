@@ -26,12 +26,12 @@ function sendMsg(msg) {
 // API. The content script taps the page's <video>/<audio> element
 // with captureStream() and does the work there.
 // No audio ever leaves the machine except to the Whisper URL the
-// user configured in the popup (default: localhost:8080).
+// user configured in the popup (default: ai-i:10300).
 
 const MAX_HISTORY = 200;
 
 const DEFAULT_SETTINGS = {
-  whisperUrl: 'http://localhost:8080/v1/audio/transcriptions', // Default is localhost — fill in your own Whisper server in the popup
+  whisperUrl: 'http://10.0.253.30:10300/v1/audio/transcriptions', // IP, not FQDN: Firefox proxy can't resolve .adhome.home, and temp add-on storage is wiped on reload so the default is what you get
   apiKey: '',
   model: 'whisper-1',
   language: 'ru',
@@ -150,6 +150,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   })();
   return true; // async sendResponse
 });
+
+// Keyboard shortcut (v1.0.10): Ctrl+Shift+Y (Cmd+Shift+Y on Mac) toggles
+// capture on the active tab. Change it in Firefox: about:addons → gear →
+// Manage Extension Shortcuts.
+const _commands = (_browser && _browser.commands) ? _browser.commands : chrome.commands;
+if (_commands && _commands.onCommand) {
+  _commands.onCommand.addListener(async (command) => {
+    if (command !== 'toggle-capture') return;
+    if (capturing) { await stopCapture(); return; }
+    const [tab] = _browser ? await _browser.tabs.query({ active: true, currentWindow: true }) : await new Promise((res) => chrome.tabs.query({ active: true, currentWindow: true }, res));
+    if (!tab || tab.id === undefined) return;
+    await startCapture(tab.id);
+  });
+}
 
 // If the captured tab is closed / navigated away, stop cleanly.
 chrome.tabs.onRemoved.addListener((tabId) => {

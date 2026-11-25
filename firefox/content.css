@@ -62,3 +62,4 @@
 #tab-whisper-overlay .tw-header:active { cursor: grabbing; }
 #tab-whisper-overlay * { pointer-events: auto; }
 #tab-whisper-overlay .tw-btn { pointer-events: auto; }
+#tab-whisper-overlay .tw-lang { color: #8ecbff; font-size: 12px; font-weight: 600; }

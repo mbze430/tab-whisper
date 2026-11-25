@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Tab Whisper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>Tab Whisper <span class="sub">local only</span></h1>
+
+  <div id="status" class="status idle">Idle — not capturing.</div>
+
+  <div class="row">
+    <button id="startBtn" class="primary">Start capturing this tab</button>
+    <button id="stopBtn" class="secondary" disabled>Stop</button>
+  </div>
+  <p class="hint">Captures the <b>active tab's</b> audio only. Start it on the tab that is playing sound, and keep that tab active / in focus.</p>
+
+  <fieldset>
+    <legend>Whisper server (yours — nothing is sent elsewhere)</legend>
+    <label>Endpoint URL
+      <input id="whisperUrl" type="text" spellcheck="false"
+        placeholder="http://localhost:8080/v1/audio/transcriptions">
+    </label>
+    <p class="hint">OpenAI-compatible <code>/v1/audio/transcriptions</code> endpoint.
+      For OpenWebUI use <code>http://localhost:8080/api/v1/audio/transcriptions</code>
+      (change host/port to match your server). The extension switches to
+      <code>/translations</code> automatically when Task is “Translate”.</p>
+    <label>API key <span class="opt">(optional — blank for local, no-auth servers)</span>
+      <input id="apiKey" type="password" autocomplete="off" placeholder="leave blank for local Whisper">
+    </label>
+    <label>Model
+      <input id="model" type="text" spellcheck="false" placeholder="whisper-1">
+    </label>
+    <p class="hint">Use the model name your server expects — e.g. <code>whisper-1</code> for
+      OpenAI-compatible servers, or your local model name for whisper.cpp / faster-whisper.</p>
+    <div class="grid">
+      <label>Language
+        <input id="language" type="text" spellcheck="false" placeholder="ru">
+      </label>
+      <label>Chunk (seconds)
+        <input id="chunkSeconds" type="number" min="3" max="60" step="1" value="10">
+      </label>
+    </div>
+    <div class="grid">
+      <label>Ignore chunks quieter than (dB)
+        <input id="minDb" type="number" min="-60" max="-10" step="1" value="-40">
+      </label>
+      <label>&nbsp;
+        <span class="hint">-40 skips silence. -30 is stricter, -50 more sensitive. Music is loud, so it still passes — the built-in hallucination blocklist catches the common invented lines.</span>
+      </label>
+    </div>
+    <label>Task
+      <select id="task">
+        <option value="translate">Translate → English (Russian speech → English text)</option>
+        <option value="transcribe">Transcribe (Russian speech → Russian text)</option>
+      </select>
+    </label>
+    <label class="check"><input id="overlayEnabled" type="checkbox"> Show live transcript overlay on the page</label>
+    <button id="saveBtn" class="secondary">Save settings</button>
+    <div id="saveMsg" class="hint"></div>
+  </fieldset>
+
+  <h2>Transcript <button id="clearBtn" class="mini">Clear</button> <button id="copyBtn" class="mini">Copy all</button></h2>
+  <div id="history" class="history"><div class="empty">No transcript yet. Start capture on a tab with Russian speech.</div></div>
+
+  <p class="foot">Local only: audio chunks go to the URL above, nowhere else. No account, no minute limit — the limit is your own Whisper server's speed.</p>
+  <script src="popup.js"></script>
+</body>
+</html>

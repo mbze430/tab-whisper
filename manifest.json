@@ -1,0 +1,55 @@
+{
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Tab Whisper"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "description": "Captures the active tab's audio and sends it, chunk by chunk, to your own local Whisper server (OpenAI-compatible). No cloud transcription, no account, no minute limit.",
+  "host_permissions": [
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://*/*"
+  ],
+  "icons": {
+    "128": "icon128.png",
+    "16": "icon16.png",
+    "48": "icon48.png"
+  },
+  "manifest_version": 3,
+  "name": "Tab Whisper \u2014 Local Tab Audio to Whisper",
+  "permissions": [
+    "tabCapture",
+    "activeTab",
+    "storage",
+    "scripting",
+    "offscreen"
+  ],
+  "version": "1.0.10",
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "offscreen.html"
+      ]
+    }
+  ]
+}

@@ -100,6 +100,10 @@ the model field entirely; some require an exact local model name).
 3. **Then the real room.** Same steps. Keep the captured tab active:
    tabCapture only works on the active tab in its window.
 
+## v1.0.13 — Copy all keeps the language tag (Nov 25, 2026)
+
+- Bug fix: Copy all was dropping the `[Language]` tag — the popup display showed it, but the copied text was built from `l.text` only. Now copied lines match the display: `3:51:02 PM [English] 🎵`.
+
 ## v1.0.12 — Auto-detect language (Nov 25, 2026)
 
 - Whisper requests now use `response_format=verbose_json` (was `json`), which returns the auto-detected source language. Every overlay/popup line is tagged, e.g. **[Russian] Hello**, and the overlay shows `» Detected language: Russian (ru)` when it changes. Caveat: Whisper guesses from the first seconds of a chunk, so a short/noisy chunk can mis-detect — treat it as "possibly", not certain.

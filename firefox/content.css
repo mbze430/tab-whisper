@@ -1,0 +1,64 @@
+#tab-whisper-overlay {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  width: min(720px, 92vw);
+  min-width: 320px;
+  height: 220px;
+  min-height: 140px;
+  max-height: 80vh;
+  overflow: hidden;
+  resize: both;
+  z-index: 2147483647;
+  background: rgba(10, 10, 14, 0.88);
+  color: #f2f2f2;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+#tab-whisper-overlay .tw-header {
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  flex: 0 0 auto;
+}
+#tab-whisper-overlay .tw-title { flex: 1; }
+#tab-whisper-overlay .tw-btn {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+#tab-whisper-overlay .tw-lines {
+  padding: 8px 10px;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.4) transparent;
+}
+#tab-whisper-overlay .tw-lines::-webkit-scrollbar { width: 10px; }
+#tab-whisper-overlay .tw-lines::-webkit-scrollbar-track { background: transparent; }
+#tab-whisper-overlay .tw-lines::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 5px; }
+#tab-whisper-overlay .tw-line { margin: 2px 0; }
+#tab-whisper-overlay .tw-time { color: #9be7c4; font-size: 12px; margin-right: 6px; }
+#tab-whisper-overlay .tw-empty { color: #aaa; font-style: italic; }
+#tab-whisper-overlay .tw-header:active { cursor: grabbing; }
+#tab-whisper-overlay * { pointer-events: auto; }
+#tab-whisper-overlay .tw-btn { pointer-events: auto; }

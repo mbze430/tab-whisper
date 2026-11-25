@@ -1,0 +1,48 @@
+# Tab Whisper — Firefox (v1.0.9)
+
+Firefox version of Tab Whisper. Same idea as the Chrome version in the
+repo root — capture audio, send chunks to your own local Whisper server,
+live translation/transcription in an on-page overlay — but built around
+what Firefox can actually do.
+
+## Why it's not a 1:1 port
+
+Firefox has **no `tabCapture` API and no offscreen API**. The only
+supported route is `captureStream()` on a real HTML5 media element
+(`<video>` / `<audio>`) in the page.
+
+- **Works:** YouTube and any site that plays through a `<video>` /
+  `<audio>` element.
+- **Does NOT work:** WebAudio-only pages, DRM/EME playback (Firefox
+  yields a silent stream), system audio, or pages with no media element.
+
+`captureStream()` does not mute the element, so you keep hearing the
+page normally — there is no audio-passthrough step like Chrome needs.
+
+## Install (temporary add-on)
+
+Firefox does not allow permanent install of an unsigned extension
+from a folder. This is a temporary add-on — it is wiped when Firefox
+restarts, and its saved settings reset to the defaults on reload.
+
+1. Open Firefox → `about:debugging#/runtime/this-firefox`
+2. Click **Load Temporary Add-on**
+3. Select this folder's `manifest.json`
+4. Open the popup, set your Whisper URL (default is
+   `http://localhost:8080/v1/audio/transcriptions`), Save, then Start
+   on the tab that is playing.
+
+## Features (same as Chrome v1.0.10, except where noted)
+
+- 10s chunks (configurable 3–60s), temperature 0, no VAD
+- Translate → English / Transcribe in original language
+- **dB gate:** popup "Ignore chunks quieter than (dB)", default -40,
+  range -60 to -10. Quiet chunks are never sent to Whisper.
+- **Hallucination blocklist:** drops "thanks for watching",
+  "thank you for watching", "продолжение следует",
+  "субтитры сделал dimatorzok"
+- Translate falls back to transcriptions once on HTTP 404/405/500
+- Overlay: top-frame only, capture-phase Hide/X buttons, dedup,
+  `» status` lines
+
+The dB setting takes effect on the next Start, not mid-capture.

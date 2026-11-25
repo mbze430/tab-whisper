@@ -1,0 +1,51 @@
+{
+  "background": {
+    "persistent": true,
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "Tab Whisper"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tab-whisper-firefox@local",
+      "strict_min_version": "109.0"
+    }
+  },
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "description": "Captures a playing <video>/<audio> element in the active tab via captureStream() and sends chunks to your own local Whisper server. No cloud, no minute limit. Firefox has no tabCapture API, so this is NOT a 1:1 port of the Chrome version \u2014 it only works on pages with a real HTML5 media element (YouTube, etc.), not arbitrary tab audio.",
+  "icons": {
+    "128": "icon128.png",
+    "16": "icon16.png",
+    "48": "icon48.png"
+  },
+  "manifest_version": 2,
+  "name": "Tab Whisper \u2014 Local Tab Audio to Whisper (Firefox)",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "<all_urls>",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://*/*"
+  ],
+  "version": "1.0.9"
+}

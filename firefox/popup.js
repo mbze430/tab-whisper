@@ -143,7 +143,9 @@ $('clearBtn').addEventListener('click', async () => {
 
 $('copyBtn').addEventListener('click', async () => {
   const stored = await storageGet('transcript');
-  const text = (stored.transcript || []).map((l) => new Date(l.at).toLocaleTimeString() + ' ' + l.text).join('\n');
+  // v1.0.13 / v1.0.12 fix: Copy all was dropping the language tag —
+  // renderHistory shows [Language] but this built text from l.text only.
+  const text = (stored.transcript || []).map((l) => new Date(l.at).toLocaleTimeString() + ' ' + (l.languageName ? '[' + l.languageName + '] ' : '') + l.text).join('\n');
   try { await navigator.clipboard.writeText(text); $('copyBtn').textContent = 'Copied'; } catch (e) { $('copyBtn').textContent = 'Copy failed'; }
   setTimeout(() => { $('copyBtn').textContent = 'Copy all'; }, 2000);
 });

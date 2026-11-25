@@ -32,6 +32,10 @@ restarts, and its saved settings reset to the defaults on reload.
    `http://localhost:8080/v1/audio/transcriptions`), Save, then Start
    on the tab that is playing.
 
+## v1.0.12 — Copy all keeps the language tag (Nov 25, 2026)
+
+Bug fix: Copy all was dropping the `[Language]` tag. Now copied lines match the display: `3:51:02 PM [English] 🎵`.
+
 ## v1.0.11 — Auto-detect language (Nov 25, 2026)
 
 Whisper requests now use `response_format=verbose_json`, which returns the auto-detected source language. Every overlay line is tagged, e.g. **[Russian] Hello**. Whisper guesses from the first seconds of a chunk, so a short/noisy chunk can mis-detect.

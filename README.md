@@ -1,5 +1,7 @@
 # Tab Whisper — Local Tab Audio to Whisper
 
+> **Firefox version:** see the [`firefox/`](firefox/) folder — same features (dB gate, hallucination blocklist, 500 fallback), but built on `captureStream()` instead of `tabCapture`, so it only works on pages with a real `<video>`/`<audio>` element. Install as a temporary add-on via `about:debugging`.
+
 A Chrome MV3 extension that captures the **active tab's audio** and feeds it,
 in chunks, to **your own local Whisper server**. No cloud transcription,
 no account, no 20-minutes-a-month freemium timer.

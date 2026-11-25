@@ -131,8 +131,10 @@
     }
   });
 
-  // Show the overlay as soon as the script is injected, so the user
-  // sees it is armed even before the first chunk comes back.
-  if (document.body) build();
-  else document.addEventListener('DOMContentLoaded', build, { once: true });
+  // v1.0.14: NO unconditional build on load. The old code built the
+  // overlay on EVERY tab as soon as the content script was injected
+  // (manifest matches <all_urls>), so every tab got an empty
+  // "Listening…" box. The overlay is now built on demand only:
+  // showLine()/showStatus() call build() when the first transcript or
+  // status line arrives for THIS tab (the capturing tab).
 })();

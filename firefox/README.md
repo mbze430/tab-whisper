@@ -32,6 +32,10 @@ restarts, and its saved settings reset to the defaults on reload.
    `http://localhost:8080/v1/audio/transcriptions`), Save, then Start
    on the tab that is playing.
 
+## v1.0.13 — Overlay only on the capturing tab (Nov 25, 2026)
+
+Bug fix: the overlay was built on EVERY tab on page load. Now it builds on demand only — when capture starts on that tab, or the first transcript/status line arrives for it.
+
 ## v1.0.12 — Copy all keeps the language tag (Nov 25, 2026)
 
 Bug fix: Copy all was dropping the `[Language]` tag. Now copied lines match the display: `3:51:02 PM [English] 🎵`.

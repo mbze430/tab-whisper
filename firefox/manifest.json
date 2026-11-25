@@ -50,7 +50,7 @@
     "http://10.0.253.30/*",
     "https://*/*"
   ],
-  "version": "1.0.12",
+  "version": "1.0.13",
   "commands": {
     "toggle-capture": {
       "suggested_key": {

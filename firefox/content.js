@@ -234,6 +234,7 @@ function languageName(code) {
     // without opening devtools.
     try {
       if (!IS_TOP) return;
+      if (settings && settings.overlayEnabled !== false) build();
       const box = document.getElementById('tw-lines');
       if (box) {
         const div = document.createElement('div');
@@ -504,8 +505,9 @@ function languageName(code) {
     return true;
   });
 
-  if (IS_TOP) {
-    if (document.body) build();
-    else document.addEventListener('DOMContentLoaded', build, { once: true });
-  }
+  // v1.0.13: NO unconditional build on load. The old code built the
+  // overlay on EVERY top frame as soon as the content script was
+  // injected, so every tab got an empty "Listening…" box. The overlay
+  // is now built on demand only: start() builds it when capture starts
+  // on THIS tab, and showLine()/status() build it on the first line.
 })();
